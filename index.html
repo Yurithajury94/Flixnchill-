@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flix N Chill — Ultimate Entertainment Hub</title>
+<meta name="theme-color" content="#0f0f12" />
+<style>
+  :root{
+    --bg:#0b0b10; --card:#12121a; --soft:#1a1a25; --text:#f5f7fb;
+    --muted:#aeb3c2; --brand:#ff2a7a; --brand2:#7a79ff; --accent:#00ffcf;
+    --good:#2bd481; --warn:#ffae42;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:radial-gradient(1200px 800px at 10% -10%, #1a1a29 0%, #0b0b10 60%) fixed;
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+    overflow-x:hidden;
+  }
+
+  /* ---------- SPLASH (plays ONCE on hub load) ---------- */
+  #splash{
+    position:fixed; inset:0; display:grid; place-items:center; background:#000; z-index:9999;
+    animation:fadeOut .9s ease 2.8s forwards;
+  }
+  #splash .logoWrap{
+    display:grid; place-items:center; gap:.75rem; text-align:center;
+    transform:translateY(10px); opacity:0; animation:slideIn .9s cubic-bezier(.2,.8,.2,1) .25s forwards;
+  }
+  #splash img{height:120px; width:auto; border-radius:18px; box-shadow:0 10px 40px rgba(255,255,255,.14)}
+  #splash h1{margin:.25rem 0 0; letter-spacing:.12em; font-weight:900; font-size:1.05rem; opacity:.9}
+  #splash p{margin:0; color:#cfd3e6; font-size:.9rem}
+  @keyframes slideIn{to{opacity:1; transform:translateY(0)}}
+  @keyframes fadeOut{to{opacity:0; visibility:hidden}}
+
+  /* ---------- NAVBAR ---------- */
+  header{
+    position:sticky; top:0; z-index:20; backdrop-filter:saturate(1.2) blur(8px);
+    background:linear-gradient(180deg, rgba(11,11,16,.9), rgba(11,11,16,.65) 60%, transparent);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .topbar{
+    display:flex; align-items:center; gap:16px; padding:12px 18px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px; font-weight:900; letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .brand img{height:28px; width:28px; border-radius:8px; object-fit:cover}
+  .brand span{background:linear-gradient(90deg,var(--brand),var(--brand2)); -webkit-background-clip:text; color:transparent}
+  nav{
+    display:flex; gap:10px; margin-left:10px; flex-wrap:wrap;
+  }
+  nav a{
+    padding:8px 10px; border-radius:10px; color:var(--text); text-decoration:none; font-weight:700; font-size:.9rem;
+  }
+  nav a.active, nav a:hover{background:var(--soft); border:1px solid rgba(255,255,255,.08)}
+  .spacer{flex:1}
+  .search{
+    display:flex; align-items:center; gap:10px; background:var(--soft); border:1px solid rgba(255,255,255,.06);
+    padding:8px 12px; border-radius:12px; min-width:220px;
+  }
+  .search input{background:transparent; border:none; outline:none; color:var(--text); width:100%}
+
+  /* ---------- HERO EXCLUSIVE PREMIERES (stacked) ---------- */
+  .exclusives{
+    display:grid; gap:18px; padding:16px 14px 4px;
+  }
+  .hero{
+    position:relative; overflow:hidden; border-radius:18px; background:#0f0f16; border:1px solid rgba(255,255,255,.08);
+    min-height:320px; display:grid; grid-template-columns: 1.2fr 1fr;
+  }
+  @media (max-width:900px){ .hero{grid-template-columns: 1fr; min-height: 480px;} }
+  .hero .bg{
+    position:absolute; inset:0; overflow:hidden; filter:saturate(1.05) contrast(1.06);
+  }
+  .hero .bg::before{
+    content:""; position:absolute; inset:-20%; background:
+      radial-gradient(60% 60% at 20% 20%, rgba(255,42,122,.25), transparent 60%),
+      radial-gradient(60% 60% at 70% 50%, rgba(122,121,255,.22), transparent 65%),
+      radial-gradient(50% 50% at 50% 90%, rgba(0,255,207,.16), transparent 60%);
+    animation:float 12s ease-in-out infinite alternate;
+  }
+  @keyframes float{to{transform:translate3d(2%, -2%, 0) scale(1.05)}}
+  .hero .shade{position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.65), rgba(0,0,0,.2));}
+  .hero .content{position:relative; z-index:2; padding:24px; display:flex; flex-direction:column; gap:12px}
+  .premiereBadge{
+    align-self:flex-start; font-size:.75rem; font-weight:900;
+    background:linear-gradient(90deg,var(--brand),var(--brand2)); color:#fff; padding:5px 10px; border-radius:999px;
+    box-shadow:0 6px 20px rgba(255,42,122,.35);
+  }
+  .hero h2{margin:0; font-size: clamp(1.3rem, 2.2vw, 2rem)}
+  .hero p{margin:0; color:#d6daea; line-height:1.5; font-size:.98rem; max-width:65ch}
+  .hero .cta{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px;
+    font-weight:800; letter-spacing:.02em; border:none; cursor:pointer;
+  }
+  .btn.play{background:var(--brand); color:white}
+  .btn.trailer{background:var(--soft); color:var(--text)}
+  .hero .poster{
+    position:relative; z-index:1; margin:auto; width:min(90%, 520px); aspect-ratio:16/9; border-radius:14px; overflow:hidden;
+    border:1px solid rgba(255,255,255,.08); box-shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  .hero .poster img{width:100%; height:100%; object-fit:cover}
+
+  /* ---------- ROWS ---------- */
+  .section{padding:18px 14px 8px}
+  .rowTitle{
+    margin:10px 4px; display:flex; align-items:center; gap:10px;
+    font-size:1.05rem; font-weight:800; letter-spacing:.02em;
+  }
+  .rowTitle .tag{font-size:.78rem; font-weight:700; color:#0b0b10; background:var(--accent);
+    padding:3px 8px; border-radius:999px}
+  .rail{
+    display:grid; grid-auto-flow:column; grid-auto-columns: clamp(160px, 19vw, 240px);
+    gap:14px; overflow-x:auto; overscroll-behavior-x:contain; padding:8px 4px 14px; scroll-snap-type:x mandatory;
+  }
+  .rail::-webkit-scrollbar{height:10px}
+  .rail::-webkit-scrollbar-thumb{background:#2b2b38; border-radius:10px}
+  .card{
+    position:relative; background:var(--card); border:1px solid rgba(255,255,255,.07);
+    border-radius:14px; overflow:hidden; box-shadow:0 10px 24px rgba(0,0,0,.25);
+    scroll-snap-align:start; isolation:isolate;
+  }
+  .thumb{position:relative; aspect-ratio:16/9; background:#0a0a0f}
+  .thumb img{width:100%; height:100%; object-fit:cover; transition:transform .35s ease}
+  .card:hover .thumb img{transform:scale(1.03)}
+  .overlay{position:absolute; inset:0; background:linear-gradient(0deg, rgba(0,0,0,.65), rgba(0,0,0,.1)); opacity:0; transition:.25s}
+  .card:hover .overlay{opacity:1}
+  .title{padding:10px 12px; font-weight:700; line-height:1.2; font-size:.95rem}
+  .meta{color:var(--muted); font-size:.78rem; padding:0 12px 12px}
+  .playBtn,.trailerBtn{
+    position:absolute; bottom:10px; left:10px; display:inline-flex; align-items:center; gap:8px; padding:8px 10px;
+    border-radius:10px; font-weight:800; letter-spacing:.02em; border:none; cursor:pointer;
+  }
+  .playBtn{background:var(--brand); color:white}
+  .trailerBtn{left:auto; right:10px; background:var(--soft); color:var(--text)}
+
+  /* ---------- PLAYER MODAL (fullscreen playback) ---------- */
+  #modal{
+    position:fixed; inset:0; display:none; place-items:center; z-index:1000;
+    background:rgba(0,0,0,.7); backdrop-filter:blur(6px);
+  }
+  #modal.open{display:grid}
+  .modalCard{
+    width:min(96vw, 1280px); background:#0e0e14; border:1px solid rgba(255,255,255,.12);
+    border-radius:16px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,.6);
+    transform:translateY(10px); animation:pop .22s ease forwards;
+  }
+  @keyframes pop{to{transform:translateY(0)}}
+  .player{aspect-ratio:16/9; background:#000}
+  .player iframe{width:100%; height:100%; border:0}
+  .modalTop{display:flex; justify-content:space-between; align-items:center; padding:12px 14px}
+  .x{background:#242432; border:1px solid rgba(255,255,255,.1); color:#fff; padding:8px 10px;
+     border-radius:10px; font-weight:800; cursor:pointer}
+
+  /* ---------- AGE VERIFY MODAL (centered) ---------- */
+  #verify{
+    position:fixed; inset:0; display:none; place-items:center; z-index:1100;
+    background:rgba(0,0,0,.72);
+  }
+  #verify.open{display:grid}
+  .verifyCard{
+    position:relative; width:min(92vw, 760px); background:#101018cc; border:1px solid rgba(255,255,255,.12);
+    border-radius:16px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,.7); backdrop-filter:blur(8px);
+  }
+  .verifyLogo{
+    position:absolute; inset:0; display:grid; place-items:center; opacity:.35; pointer-events:none;
+    background:
+      radial-gradient(50% 50% at 50% 45%, rgba(255,42,122,.18), transparent 60%),
+      radial-gradient(50% 50% at 55% 55%, rgba(122,121,255,.16), transparent 60%);
+    animation:logoFloat 9s ease-in-out infinite alternate;
+  }
+  @keyframes logoFloat{to{transform:scale(1.03) translateY(-2%)}}
+  .verifyLogo img{height:110px; width:auto; filter:drop-shadow(0 12px 40px rgba(255,255,255,.08))}
+  .verifyBody{position:relative; z-index:2; padding:18px}
+  .verifyBody h3{margin:0 0 6px}
+  .verifyBody p{margin:0 0 14px; color:#d7dbeb}
+  .verifyActions{display:flex; gap:10px; flex-wrap:wrap}
+  .btn.ghost{background:transparent; border:1px solid rgba(255,255,255,.2); color:#fff}
+  .hint{font-size:.8rem; color:#b9bfd3; margin-top:10px}
+  .badge{display:inline-flex; align-items:center; gap:6px; background:#1d1d29; border:1px solid rgba(255,255,255,.14);
+         color:#fff; padding:6px 8px; border-radius:999px; font-size:.75rem; font-weight:800}
+
+  /* ---------- MISC ---------- */
+  main{padding-bottom:80px}
+  @media (max-width:640px){ .search{min-width:0; flex:1} }
+</style>
+</head>
+<body>
+
+<!-- Splash / animated intro (plays once) -->
+<div id="splash" aria-hidden="true">
+  <div class="logoWrap">
+    <img src="logo.gif" alt="Flix N Chill Logo" />
+    <h1>FLIX <span style="color:#ff2a7a">N</span> CHILL</h1>
+    <p>Loading your library…</p>
+    <audio id="intro-audio" src="intro.mp3" preload="auto"></audio>
+  </div>
+</div>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <img src="logo.gif" alt="Logo">
+      <span>Flix N Chill</span>
+    </div>
+    <nav id="tabs">
+      <a href="#" data-tab="home" class="active">Home</a>
+      <a href="#" data-tab="movies">Movies</a>
+      <a href="#" data-tab="tv">TV Shows</a>
+      <a href="#" data-tab="music">Music</a>
+      <a href="#" data-tab="podcasts">Podcasts</a>
+      <a href="#" data-tab="audiobooks">Audiobooks</a>
+      <a href="#" data-tab="news">News</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.2-4.2M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="q" placeholder="Search titles…" />
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<!-- Player Modal -->
+<div id="modal" role="dialog" aria-label="Player">
+  <div class="modalCard" id="modalCard">
+    <div class="player" id="player"></div>
+    <div class="modalTop">
+      <div id="nowPlaying" style="font-weight:800"></div>
+      <button class="x" onclick="closeModal()">Close ✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- Age Verification Modal -->
+<div id="verify" role="dialog" aria-label="Verify Age">
+  <div class="verifyCard">
+    <div class="verifyLogo"><img src="logo.gif" alt="Hub Logo" /></div>
+    <div class="verifyBody">
+      <div class="badge">🔞 Age Verification Required</div>
+      <h3 id="verifyTitle">This video needs YouTube verification</h3>
+      <p>To comply with YouTube policies, please verify your age/sign in on YouTube. We’ll keep this window on top so it feels like you never left the hub. After verifying, click <b>Play Now</b> to start instantly in fullscreen.</p>
+      <div class="verifyActions">
+        <button class="btn trailer" id="btnVerify">Verify on YouTube</button>
+        <button class="btn play" id="btnPlayAfter">Play Now</button>
+        <button class="btn ghost" id="btnCancelVerify">Cancel</button>
+      </div>
+      <div class="hint">Tip: If a popup is blocked, allow popups for this site, then press <i>Verify on YouTube</i> again.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====================== UTILITIES ====================== */
+const YTID = url => {
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+    const id = u.searchParams.get('v');
+    if(id) return id;
+    const parts = u.pathname.split('/').filter(Boolean);
+    return parts[parts.length-1] || '';
+  }catch(e){return '';}
+};
+const thumb = url => {
+  const id = YTID(url);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : 'https://picsum.photos/800/450?blur=2';
+};
+const embedURL = url => {
+  const id = YTID(url);
+  return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0` : url;
+};
+const watchURL = url => {
+  const id = YTID(url);
+  return id ? `https://www.youtube.com/watch?v=${id}` : url;
+};
+
+/* ====================== DATA ====================== */
+/* Core categories appear as rows. Exclusive Premieres render as big stacked heroes at the top of Home. */
+const DATA = [];
+
+/* ---------- EXCLUSIVE PREMIERES (stacked full-width cards) ---------- */
+const EXCLUSIVES = [
+  {
+    title: "Culture Cartel – Season 1 (Exclusive Premiere)",
+    url: "https://youtu.be/wJcPQG5yHtc?si=_R8ZaL9rV0G18XeX",
+    trailer: "https://youtu.be/7uchZjX8Pyo",
+    synopsis: "A wild, no-holds-barred adult animated comedy diving headfirst into the chaotic hustle of fame, fortune, and street-level power. A crew of outrageous misfits forms an underground empire—half for the culture, half for the cash—roasting anyone in their way.",
+    isPremiere: true,
+    category: "Exclusive Premieres",
+    age: false
+  },
+  {
+    title: "Family Felinz Network (Exclusive Premiere)",
+    url: "https://youtu.be/xJQ1Ky2sVt4?si=cyaBNvCaNND78vcp",
+    trailer: "https://youtu.be/IKPcC4tTOrY",
+    synopsis: "A bold, irreverent adult animated comedy set in the high-stakes world of hip-hop, through the eyes of two rap superstar brothers, Yuri tha Jury. Clout is currency—and family is complicated.",
+    isPremiere: true,
+    category: "Exclusive Premieres",
+    age: false
+  }
+];
+
+/* ---------- MOVIES (from all batches shared; add more anytime) ---------- */
+function addMovie(title, url, opts={}){
+  DATA.push({title, url, category:"Movies", ...opts});
+}
+[
+  ["Spell","https://youtu.be/-P2cVgu2u5A?si=7bPU7PoYoK57tjVw"],
+  ["Love Stinks","https://youtu.be/vcM3YN_wD88?si=Mv7vm3Vg7MYmiBVV"],
+  ["Teen Lust","https://youtu.be/Ktd4sEVDZ5U?si=MV4GpvgnvQYNpTTY"],
+  ["Django","https://youtu.be/U_xq8BJAPBg?si=R2xk-zbtTFL1zXAL"],
+  ["The Wedding Trip","https://youtu.be/8wZN1B2bWmk?si=CtteR6zVzEB1FHjb"],
+  ["Life of the Party","https://youtu.be/ChZiqbT9TH0?si=83oAQknmnA5zAj94"],
+  ["Little Man","https://youtu.be/0bniIp1jiTQ?si=kHPmhSnCeroo8AMg"],
+  ["Queen of the Damned","https://youtu.be/Bt-i1Q9IoDg?si=oB-3FJ8TuJQvnAxs"],
+  ["Coming to America","https://youtu.be/gFC6SXHbtFI?si=5iZtqRjxhJJWVsDp"],
+  ["No Good Deed","https://youtu.be/5W8AYoDVZHE?feature=shared"],
+  ["Malcolm X","https://youtu.be/VPainnRd2zg?feature=shared"],
+  ["Ninja Assassin","https://youtu.be/EivxnYQnDwA?si=cr22Sh7rurXDCQFe"],
+  ["Escape Room","https://youtu.be/Su2iXUcoR2o?si=sf2HxStwXSUklt0m"],
+  ["Playas Ball","https://youtu.be/2378IC_UsD0?si=SLtLKb-xYhu8abLW"],
+  ["Juice","https://youtu.be/VKcmwFTlhRs?si=XthdyvPxo185_Vb5"],
+  ["Good Burger","https://youtu.be/qPwueVvYGsk?si=-vYjc9dT0ZWnJEtJ"],
+  ["The Bank Job","https://youtu.be/e51Ore2OWSU?si=XkrN8O1vzHtf1xcY"],
+  ["Frequencies","https://youtu.be/bgJcZQVuwTk?si=ZM2fTUeex0-w3fRu"],
+  ["Scary Movie 2","https://youtu.be/C48i0MjC3MU?si=MvSELaaIB_UEHX-Q"],
+  ["Hansel & Gretel Get Baked","https://youtu.be/sxxVUPZ4Apc?si=JfDzq-By112jptU7"],
+  ["The Dinner Party","https://youtu.be/LMruOdkewJ8?si=1ImUEqd8oebekJmH"],
+  ["The Invited","https://youtu.be/BQpNHam6H3w?si=MTN3s9rnCJ0E0irS"],
+  ["Double Blind","https://youtu.be/zsXDf-0Z9jk?si=vx259JsH1Iq8yGla"],
+  ["The Farm","https://youtu.be/YMXC4l-zuew?si=9GmpKFxxtsFbwTt6"],
+  ["Choices","https://youtu.be/qBjVbeHlJiI?si=MoyYrAI1lvCIJy17"],
+  ["Bob the Butler","https://youtu.be/vLRK63m0m7Y?si=Mu5jVrlKhaJjyYyG"],
+  ["The Jones Plantation","https://youtu.be/yFapTWR42Ew?feature=shared"],
+  ["Buffed Up","https://youtu.be/0gWtN9aF4Ws?si=0bEGdh-6R8HsAIQQ"],
+  ["Van Wilder","https://youtu.be/tc40NpFqdCE?si=XE38wSmC8RUTsSrE"],
+  ["Extreme Movie","https://youtu.be/s6uey9ImYkc?si=jYBBRJ7ku7GWKxr6"],
+  ["Dirty Teacher","https://youtu.be/PL8UdZ3E7FA?si=PUfWY7TubOdHYFxh"],
+  ["Don’t Get Caught","https://youtu.be/rnKPJHF3zXw?si=yIHOlMpT2rlUBbvr"],
+  ["Money Talks","https://youtu.be/LbtVomR4mOs?si=0JGTR8nMgTFZpM5k"],
+  ["Scary Movie","https://youtu.be/eka754553ZU?si=Z_2_I8D1z_eZfdv4"],
+  ["Jennifer’s Body","https://youtu.be/NO9D_hoe2rY?si=tJSpmilFnFj_NzgU"],
+  ["Super Troopers","https://youtu.be/rHjoDbmc4m4?si=qlp-Z5R4s-M91Wq9"],
+  ["Little","https://youtu.be/5Qhk8AvoPN4?si=O7csOP6hennmdbwH"],
+  ["Boomerang","https://youtu.be/M40y0sUfDRM?si=NciM4jgETLH5ZBqV"],
+  ["Hustle & Flow","https://youtu.be/2LiH3a9bUBg?si=AtX7poaJBVB6aWEJ"],
+  ["Kings of Comedy","https://youtu.be/SBo6FDrgBlg?si=ULMPUkajFa-X8kPl"],
+  ["Queens of Comedy","https://youtu.be/8SyBc9ySGhg?si=mvOWlPC5Yn9T1wuh"],
+  ["I’m Bout It","https://youtu.be/6tGhqnky5Oo?si=NfCo6hi_dDVm2M8b"],
+  ["I Got The Hook-Up","https://youtu.be/3jNUXrPryW8?si=Y9VlP05wWFmUTJbl"],
+  ["Still Bout It","https://youtu.be/AuFmmwDS8hY?si=Hi47AqgizLWLZXxS"],
+  ["Da Last Don","https://youtu.be/Si-59_L9uR8?si=Zg6htyez-Ksp0dnt"],
+  ["Hot Boys","https://youtu.be/VQmTQ_u7Ets?si=x17_aZSw4M5p_2-I"]
+].forEach(([title,url])=>addMovie(title,url));
+
+/* Last batch you sent */
+[
+  ["The Pizzagate Massacre","https://youtu.be/NaMGotwuEwQ?si=9HB7rCfjqkCvRV7d", {age:false}],
+  ["The Curse of the Forbidden Tribe","https://youtu.be/vBAsCMuQDOo?si=Zr22Zzvp6HpnGSBB", {age:false}],
+  ["Containment","https://youtu.be/3DylQJD2pjc?si=biQAjWJoefcC7cr-", {age:false}],
+  ["Secrets in the Sisterhood","https://youtu.be/llE1AieIZ7g?si=sgz6OZ11hOo5E1Pu", {age:false}],
+  ["Q Desire","https://youtu.be/t9K1ZbnUe0Q?si=7uJj8Qpi0FYoSiBr", {age:true}],       // example flagged
+  ["Baller Blocking","https://youtu.be/p5Gg9ZvZV_E?si=Otvqq1U9CcKI6jMu", {age:true}] // example flagged
+].forEach(([title,url,opts])=>addMovie(title,url,opts));
+
+/* Extra loose links (auto-categorized as Movies) */
+[
+  "https://youtu.be/uxkpLfKqUrk?si=x-gw55TlMRN3Wyd2",
+  "https://youtu.be/yuHl37YtKd0?si=Nu5uhVXSySqMnWo-",
+  "https://youtu.be/lmBLzNt7niI?si=pA3zIhYrT6iVxtmn",
+  "https://youtu.be/N4n7kA2RqzA?si=tMBEOEwlNHXuxfMo",
+  "https://youtu.be/LbtVomR4mOs?si=kGU73GYsWzDhDib1",
+  "https://youtu.be/sByF7lCASiM?si=wC5Ephck2k4mr2BV",
+  "https://youtu.be/EbqIBvuXKkE?si=dbDER_lcISfeAfTp",
+  "https://youtu.be/2uchp_SLHBM?si=aJ2o46umG56IMhAT",
+  "https://youtu.be/KUKQLQykus8?si=xvvWUzdEvkKbXKwl",
+  "https://youtu.be/U_xq8BJAPBg?si=TFzDlmL19lOKESTP",
+  "https://youtu.be/YQpXF2W7EDM?si=7WPwqbNnEXj7B1Lv",
+  "https://youtu.be/qPwueVvYGsk?si=H9gzXk7qqYSmcYm7",
+  "https://youtu.be/SBo6FDrgBlg?si=ZGI_3VTmLGN4MrYA",
+  "https://youtu.be/8SyBc9ySGhg?si=aYDLGk9kxfUb5Uon",
+  "https://youtu.be/M40y0sUfDRM?si=7LCkILtqgO0pFJTU",
+  "https://youtu.be/K3I79BbyWyc?si=dNIWC5HsGu0FsntT",
+  "https://youtu.be/2LiH3a9bUBg?si=GF_UyAcvX1m5qxUG",
+  "https://youtu.be/DzOG5CR9zAc?si=ht3JlPFpimkhIE9d",
+  "https://youtu.be/zIvnzJaBUv4?si=CErmYx3SwZBjBv9q",
+  "https://youtu.be/utPyz4n818E?si=k-PZxC1uimleTMa9"
+].forEach(url=>DATA.push({title:"Video", url, category:"Movies"}));
+
+/* ---------- TV SHOWS ---------- */
+const TV = [];
+[
+  ["Crown Lake (Ep)","https://youtu.be/iyZPZilR150?si=trnJjg5YuZ_sSHDO", "https://youtu.be/FGPDaLSEidw?si=SLczkR2TdukHZ_Nx"],
+  ["The Three Stooges","https://youtu.be/nY8VCiRRsX0?si=JuO_Ch3etPjdp3VH", null],
+  ["The Three Stooges Ep","https://youtu.be/vq-fA3lGb6A?si=dxZYqeYCWPE1eXMH", null],
+  ["Red & Meth Show","https://youtu.be/5MUNNTBZJhA?si=oDcnVjnKL-93xa-l", null],
+  ["Baddies ATL","https://youtu.be/VSqQFPDtgIs?si=5P5oLULawXSFfpCP", null],
+  ["Loud House","https://youtu.be/0GNuqDemcDA?feature=shared", null],
+  ["The First Family","https://youtu.be/JXD9RdRjmzs?si=CLxokRsAuu1xmxGq", null],
+  ["Still Standing","https://youtu.be/70r2MbGpGHs?si=wBXzbbZwEwy_kxMm", null],
+  ["Partners in Rhyme","https://youtu.be/Cog_VXZEse4?si=DF6SLND2fz9OiLP0", null],
+  ["The Cleveland Show","https://youtu.be/4SlpGl71AOM?si=g0bKJwvmpV1OadvB", null],
+  ["The Boondocks","https://youtu.be/Ij15X7wtaMg?si=qjxmzmmRaxpNIBh2", null],
+  ["Man and Wife","https://youtu.be/pHj0wQSAqFE?si=UynyplE0pce1tDhN", null],
+  ["Damon S1 E1","https://youtu.be/P5epMIM1Icg?si=a1mv6JK94UxRmr27", null],
+  ["Everybody Hates Chris","https://youtu.be/JCzkUYQFQbY?si=NKY7XQEtX30bFBsB", null],
+  ["Family Time","https://youtu.be/pUoVK40xwtM?si=c-isPIsYaHexMCNW", null],
+  ["Robot Chicken","https://youtu.be/uE3w3vbrIFU?si=e4mPnj-_-l4boQnl", null],
+  ["Pink Panther","https://youtu.be/OMbY_OHYrf0?feature=shared", null],
+  ["In the Cut","https://youtu.be/T8rXaqDSZ6E?si=8LyV6qQULdlNsmws", null],
+  ["Goosebumps","https://youtu.be/tb32iU1VAmY?si=FakDtzYcOXGSS97m", null],
+  ["Are We There Yet?","https://youtu.be/yvp_QFyB-OY?si=IIcEnX94R1vJPpTC", null],
+  ["NYPD Blue","https://youtu.be/S0qSiHN6Ypk?si=nXMmu0uyERqEr21N", null],
+  ["Total Drama Island","https://youtu.be/3DdAGs0diZo?feature=shared", null],
+  ["In Living Color","https://youtu.be/pGt87ffkTEU?si=nncDh5BCrFQ4g7Rn", null],
+  ["Reno 911","https://youtu.be/RHjqxAUedGs?si=YM_MoRlhT1Dqn0bE", null],
+  ["Celebrity Deathmatch","https://youtu.be/yBjbYAQWcjE?si=rq28VO6pJrPO1t8x", null],
+  ["Buddies","https://youtu.be/x0gwsU3QGuM?si=DYjIIHbe0bhoHxtX", null],
+  ["For Better or Worse","https://youtu.be/acRw7uDa5jQ?si=6EV6h3FN4xd-ii4g", null]
+].forEach(([title,url,trailer])=>TV.push({title,url,trailer,category:"TV Shows"}));
+
+/* ---------- MUSIC (albums/playlists) ---------- */
+const MUSIC = [
+  {title:"Yuri tha Jury – Propaganda (Album)", url:"https://youtube.com/playlist?list=OLAK5uy_m9INrU8Tg7rvlNi_hI2FU6pwbb2bkBTHA&si=nq2VN2L-16Y2jn2y"},
+  {title:"Straight Shooter – Street Paper (Album)", url:"https://youtube.com/playlist?list=OLAK5uy_mwScIMu8xFhNw8_QIOYqB58uwprQiQ5tE&si=MRez6G-QIEKbScCb"},
+  {title:"Family Felinz – Gemini (Album)", url:"https://youtube.com/playlist?list=OLAK5uy_lp6QgsG1MpMVKwX3XGuU76hnN-M3o9eVg&si=ftV-bvl91WKy8u7x"}
+];
+
+/* ---------- PODCASTS ---------- */
+const PODCASTS = [
+  ["Joe Rogan Podcast","https://youtu.be/Rx8BcDThVeQ?si=FnrESEBIW0UsYfyM"],
+  ["PBD Podcast","https://youtu.be/y_kMTzxYXYQ?si=PfP0R8aVQAY6H1MC"],
+  ["Poppa Duck Podcast","https://youtu.be/sTO0uOLxQxs?si=gb5kd_-Uii12BfvT"],
+  ["Poppa Duck Podcast #2","https://youtu.be/xS03jQ1L_IU?si=H731CHlR-n447xKp"],
+  ["19 Keys – High Level","https://www.youtube.com/live/MUYR5ZIYZQ8?si=VS6ZAjlxLSzoxniX"],
+  ["19 Keys – Live 2","https://www.youtube.com/live/TMvT34Cl9PU?si=OkTEplEZo55qvbc4"],
+  ["19 Keys – Episode","https://youtu.be/wJziBDRnMCE?si=IX06ubVUfWw0u9g9"]
+].map(([title,url])=>({title,url,category:"Podcasts"}));
+
+/* ---------- AUDIOBOOKS ---------- */
+const AUDIOBOOKS = [
+  ["Audiobook 1","https://youtu.be/A66u60f0P8E?si=p_L6tWTX-Yw7xY4U"],
+  ["Audiobook 2","https://youtu.be/O5QrypdRmRg?si=8ET3HWyNEvw7tTuU"],
+  ["Audiobook 3","https://youtu.be/rK60ou4Sdn0?si=GGV_Z9GPwJ3u-xgt"],
+  ["Audiobook 4","https://youtu.be/rmPgT3C3svs?si=JsNFsJVGRtjY7L6F"]
+].map(([title,url])=>({title,url,category:"Audiobooks"}));
+
+/* ---------- NEWS ---------- */
+const NEWS = [
+  ["Current News 1","https://youtu.be/fz46B9QBMNY?si=tMIuV_r9L-ipDxKl"],
+  ["Current News 2","https://youtu.be/KeXgKuFJ4J0?si=-InYdP0H8bGOR-Im"],
+  ["Current News 3","https://youtu.be/GQUMTBSTl4g?si=xkpw8rSjWYarsUym"],
+  ["Current News 4","https://youtu.be/H_krWlkWxKc?si=JylPxb6pC6kTQlkt"]
+].map(([title,url])=>({title,url,category:"News"}));
+
+/* ====================== APP RENDERING ====================== */
+const app = document.getElementById('app');
+
+function makeActionButtons(item, container){
+  const play = document.createElement('button');
+  play.className = 'btn play';
+  play.textContent = '▶ Play';
+  play.addEventListener('click',()=>handlePlay(item.title, item.url, item));
+
+  container.appendChild(play);
+
+  if(item.trailer){
+    const tb = document.createElement('button');
+    tb.className = 'btn trailer';
+    tb.textContent = 'Trailer';
+    tb.addEventListener('click',()=>handlePlay(item.title+' — Trailer', item.trailer, item, true));
+    container.appendChild(tb);
+  }
+}
+
+function renderExclusives(){
+  const wrap = document.createElement('div');
+  wrap.className = 'exclusives';
+  EXCLUSIVES.forEach(ex=>{
+    const hero = document.createElement('section');
+    hero.className='hero';
+    hero.innerHTML = `
+      <div class="bg"></div><div class="shade"></div>
+      <div class="content">
+        <span class="premiereBadge">Exclusive Premiere</span>
+        <h2>${ex.title}</h2>
+        <p>${ex.synopsis}</p>
+        <div class="cta"></div>
+      </div>
+      <div class="poster"><img loading="lazy" src="${thumb(ex.url)}" alt="${ex.title}"></div>
+    `;
+    makeActionButtons(ex, hero.querySelector('.cta'));
+    wrap.appendChild(hero);
+  });
+  return wrap;
+}
+
+function makeCard(item){
+  const t = document.createElement('div');
+  t.className = 'card';
+  t.innerHTML = `
+    ${item.isPremiere ? '<div class="premiereBadge" style="position:absolute;top:10px;left:10px;">Exclusive</div>' : ''}
+    <div class="thumb">
+      <img loading="lazy" src="${thumb(item.url)}" alt="${item.title}" />
+      <div class="overlay"></div>
+      <button class="playBtn">▶ Play</button>
+      ${item.trailer ? '<button class="trailerBtn">Trailer</button>' : ''}
+    </div>
+    <div class="title">${item.title}</div>
+    <div class="meta">${item.category||''}</div>
+  `;
+  t.querySelector('.playBtn').addEventListener('click',()=>handlePlay(item.title, item.url, item));
+  const tb = t.querySelector('.trailerBtn');
+  if(tb) tb.addEventListener('click',()=>handlePlay(item.title+' — Trailer', item.trailer, item, true));
+  return t;
+}
+
+function makeRow(title, tag, items){
+  const wrap = document.createElement('section');
+  wrap.className='section category';
+  wrap.innerHTML = `
+    <div class="rowTitle">${title} ${tag?`<span class="tag">${tag}</span>`:''}</div>
+    <div class="rail"></div>
+  `;
+  const rail = wrap.querySelector('.rail');
+  items.forEach(it=>rail.appendChild(makeCard(it)));
+  return wrap;
+}
+
+function byCat(arr, name){ return arr.filter(x=>x.category===name); }
+
+function renderTab(tab){
+  app.innerHTML = '';
+  if(tab==='home'){
+    // Exclusives stacked first
+    app.appendChild(renderExclusives());
+    // Then rows
+    app.appendChild(makeRow('Movies', `${byCat(DATA,"Movies").length} items`, byCat(DATA,"Movies")));
+    app.appendChild(makeRow('TV Shows', `${TV.length} items`, TV));
+    app.appendChild(makeRow('Music', `${MUSIC.length} playlists`, MUSIC.map(m=>({title:m.title,url:m.url,category:"Music"}))));
+    app.appendChild(makeRow('Podcasts', `${PODCASTS.length} items`, PODCASTS));
+    app.appendChild(makeRow('Audiobooks', `${AUDIOBOOKS.length} items`, AUDIOBOOKS));
+    app.appendChild(makeRow('News', `${NEWS.length} items`, NEWS));
+  }else if(tab==='movies'){
+    app.appendChild(makeRow('All Movies', `${byCat(DATA,"Movies").length} items`, byCat(DATA,"Movies")));
+  }else if(tab==='tv'){
+    app.appendChild(makeRow('All TV Shows', `${TV.length} items`, TV));
+  }else if(tab==='music'){
+    // Dedicated music grid with inline players
+    const wrap = document.createElement('section');
+    wrap.className='section';
+    wrap.innerHTML = `<div class="rowTitle">Music <span class="tag">${MUSIC.length} playlists</span></div><div class="rail"></div>`;
+    const rail = wrap.querySelector('.rail');
+    MUSIC.forEach(m=>{
+      const c = document.createElement('div');
+      c.className='card';
+      c.innerHTML = `
+        <div class="thumb"><img loading="lazy" src="${thumb(m.url)}" alt="${m.title}"/><div class="overlay"></div>
+          <button class="playBtn">▶ Play</button>
+        </div>
+        <div class="title">${m.title}</div>
+        <div class="meta">Music</div>
+      `;
+      c.querySelector('.playBtn').addEventListener('click',()=>handlePlay(m.title, m.url, {category:"Music"}));
+      rail.appendChild(c);
+    });
+    app.appendChild(wrap);
+  }else if(tab==='podcasts'){
+    app.appendChild(makeRow('Podcasts', `${PODCASTS.length} items`, PODCASTS));
+  }else if(tab==='audiobooks'){
+    app.appendChild(makeRow('Audiobooks', `${AUDIOBOOKS.length} items`, AUDIOBOOKS));
+  }else if(tab==='news'){
+    app.appendChild(makeRow('News', `${NEWS.length} items`, NEWS));
+  }
+}
+
+/* ====================== NAV & SEARCH ====================== */
+document.getElementById('tabs').addEventListener('click', e=>{
+  const a = e.target.closest('a[data-tab]');
+  if(!a) return;
+  e.preventDefault();
+  document.querySelectorAll('#tabs a').forEach(n=>n.classList.remove('active'));
+  a.classList.add('active');
+  renderTab(a.dataset.tab);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.getElementById('q').addEventListener('input', e=>{
+  const q = e.target.value.trim().toLowerCase();
+  if(!q){ renderTab(document.querySelector('#tabs a.active').dataset.tab); return; }
+  // search in all known arrays
+  const hay = [
+    ...EXCLUSIVES,
+    ...DATA,
+    ...TV,
+    ...MUSIC.map(m=>({title:m.title,url:m.url,category:"Music"})),
+    ...PODCASTS,
+    ...AUDIOBOOKS,
+    ...NEWS
+  ];
+  const results = hay.filter(x=>x.title.toLowerCase().includes(q));
+  app.innerHTML='';
+  app.appendChild(makeRow(`Search: "${q}"`, `${results.length} found`, results));
+});
+
+/* ====================== PLAYER & AGE VERIFY FLOW ====================== */
+const modal = document.getElementById('modal');
+const player = document.getElementById('player');
+const nowPlaying = document.getElementById('nowPlaying');
+
+let pendingItem = null;      // holds the thing we’re trying to play when verify kicks in
+let pendingIsTrailer = false;
+let popupRef = null;
+
+function fullscreen(el){
+  const mc = document.getElementById('modalCard');
+  if(mc.requestFullscreen){ mc.requestFullscreen().catch(()=>{}); }
+  else if(mc.webkitRequestFullscreen){ mc.webkitRequestFullscreen(); }
+}
+
+function openModal(title, url){
+  nowPlaying.textContent = title;
+  player.innerHTML = `<iframe allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen src="${embedURL(url)}"></iframe>`;
+  modal.classList.add('open');
+  // try to enter fullscreen after a tick
+  setTimeout(()=>fullscreen(player), 150);
+}
+
+function closeModal(){
+  modal.classList.remove('open');
+  player.innerHTML = '';
+}
+
+/* Verify Modal elements */
+const verify = document.getElementById('verify');
+const btnVerify = document.getElementById('btnVerify');
+const btnPlayAfter = document.getElementById('btnPlayAfter');
+const btnCancelVerify = document.getElementById('btnCancelVerify');
+const verifyTitle = document.getElementById('verifyTitle');
+
+function openVerify(item, isTrailer){
+  pendingItem = item; pendingIsTrailer = !!isTrailer;
+  verifyTitle.textContent = `Verify to watch: ${item.title}${isTrailer?' — Trailer':''}`;
+  verify.classList.add('open');
+}
+
+function closeVerify(){ verify.classList.remove('open'); }
+
+btnVerify.addEventListener('click', ()=>{
+  if(!pendingItem) return;
+  // open a small external window to YouTube watch page (user-gesture so popup allowed)
+  popupRef = window.open(watchURL(pendingIsTrailer ? pendingItem.trailer : pendingItem.url), 'ytverify', 'width=900,height=680');
+});
+
+btnPlayAfter.addEventListener('click', ()=>{
+  if(!pendingItem) return;
+  closeVerify();
+  openModal(pendingItem.title + (pendingIsTrailer?' — Trailer':''), pendingIsTrailer ? pendingItem.trailer : pendingItem.url);
+  pendingItem = null; pendingIsTrailer = false;
+});
+
+btnCancelVerify.addEventListener('click', ()=>{
+  closeVerify();
+  pendingItem = null; pendingIsTrailer = false;
+});
+
+function handlePlay(title, url, item={}, isTrailer=false){
+  // If item explicitly flagged as age-restricted → go to verify flow.
+  if(item.age){ openVerify(item, isTrailer); return; }
+
+  // Try to play. If iframe doesn't load in time (blocked), show verify modal.
+  let loaded = false;
+  const test = document.createElement('iframe');
+  test.allow = "autoplay; encrypted-media; picture-in-picture";
+  test.src = embedURL(url);
+  test.style.display='none';
+  const timeout = setTimeout(()=>{
+    if(!loaded){
+      // assume blocked/age-gated → use verify flow
+      test.remove();
+      openVerify(item.title ? item : {title, url}, isTrailer);
+    }
+  }, 2500);
+
+  test.onload = ()=>{
+    loaded = true;
+    clearTimeout(timeout);
+    test.remove();
+    openModal(title, url);
+  };
+  document.body.appendChild(test);
+}
+
+/* Close modal when clicking the dim background */
+document.getElementById('modal').addEventListener('click', (e)=>{
+  if(e.target.id==='modal') closeModal();
+});
+
+/* ====================== READY (intro audio once) ====================== */
+window.addEventListener('load', ()=>{
+  // play intro sound (muted-autoplay policies vary; user gesture may be required)
+  const intro = document.getElementById('intro-audio');
+  const tryPlay = ()=> intro && intro.play().catch(()=>{});
+  // attempt delayed play; users often interact quickly
+  setTimeout(tryPlay, 300);
+  // hide splash after animation
+  setTimeout(()=>document.getElementById('splash').style.display='none', 3200);
+
+  // initial tab
+  renderTab('home');
+});
+
+/* ====================== END ====================== */
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Family Felinz -->
+  <h2>Family Felinz — Discography</h2>
+  <div class="row">
+    <div class="album-card">
+      <iframe src="https://open.spotify.com/embed/album/4Gfr3YEXYCvW4OpBNHDooD"></iframe>
+      <div class="album-title">Street Musik</div>
+    </div>
+  </div>
+  <div class="platforms">
+    <a href="https://open.spotify.com/artist/0rFGsU2kW7ExqpE76Q1ivR" target="_blank">Spotify</a>
+    <a href="#">Apple Music</a>
+    <a href="#">YouTube</a>
+  </div>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Widget — Netflix Style</title>
+  <style>
+    body {
+      background-color: #141414;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      margin: 20px 0 10px;
+      font-size: 1.5rem;
+    }
+    .carousel {
+      position: relative;
+    }
+    .row {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 20px;
+      padding: 10px 0;
+    }
+    .row::-webkit-scrollbar {
+      display: none;
+    }
+    .album-card {
+      flex: 0 0 auto;
+      width: 200px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .album-card:hover {
+      transform: scale(1.08);
+    }
+    .album-card img {
+      width: 100%;
+      border-radius: 12px;
+    }
+    .album-title {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+    .platforms a {
+      background: #e50914;
+      padding: 8px 14px;
+      margin-right: 10px;
+      border-radius: 20px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    .platforms a:hover {
+      background: #f40612;
+    }
+    .scroll-btn {
+      position: absolute;
+      top: 40%;
+      transform: translateY(-50%);
+      background: rgba(20,20,20,0.7);
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      display: none;
+      z-index: 10;
+    }
+    .carousel:hover .scroll-btn {
+      display: block;
+    }
+    .scroll-left { left: -10px; }
+    .scroll-right { right: -10px; }
+
+    /* Popup modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      position: relative;
+    }
+    .modal-content iframe {
+      width: 100%;
+      height: 380px;
+      border-radius: 12px;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px; right: 15px;
+      font-size: 1.8rem;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+
+  <!-- Sin City -->
+  <h2>Sin City — Discography</h2>
+  <div class="carousel">
+    <button class="scroll-btn scroll-left" onclick="scrollRow(this, -1)">&#8249;</button>
+    <div class="row">
+      <div class="album-card">
+        <img src="https://via.placeholder.com/200x200?text=Coming+Soon" alt="Coming Soon">
+        <div class="album-title">Turk tha Kandi man Coming Soon</div>
+      </div>
+    </div>
+    <button class="scroll-btn scroll-right" onclick="scrollRow(this, 1)">&#8250;</button>
+  </div>
+
+  <!-- Modal -->
+  <div id="albumModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h3 id="modalTitle"></h3>
+      <iframe id="modalIframe" src="" frameborder="0" allow="encrypted-media"></iframe>
+      <div class="platforms" style="margin-top:15px;">
+        <a id="spotifyLink" href="#" target="_blank">Spotify</a>
+        <a href="#">Apple Music</a>
+        <a href="#">YouTube</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scrollRow(button, direction) {
+      const carousel = button.parentElement;
+      const row = carousel.querySelector('.row');
+      const scrollAmount = 220; 
+      row.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+
+    function openModal(embedUrl, title) {
+      document.getElementById("modalIframe").src = embedUrl;
+      document.getElementById("modalTitle").innerText = title;
+      document.getElementById("spotifyLink").href = embedUrl.replace("embed/", "");
+      document.getElementById("albumModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("albumModal").style.display = "none";
+      document.getElementById("modalIframe").src = "";
+    }
+
+    window.onclick = function(e) {
+      if (e.target == document.getElementById("albumModal")) {
+        closeModal();
+      }
+    }
+  </script>
+
+</body>
+</html>
